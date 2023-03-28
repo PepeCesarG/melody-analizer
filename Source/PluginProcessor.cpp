@@ -204,24 +204,49 @@ void MelodyanalizerAudioProcessor::loadFile()
 
             //Hacer cruces por cero y calcular la fft de cada silaba
             juce::Array<float> buffer;
+            juce::MidiMessageSequence midiBuffer;
             int zeroCrossing = 0;
+            int bits = 1;
+            double prevMidiNote = -1;
             for (int i = 0; i < formatReader->lengthInSamples - 1; ++i) {
                 float sample = audioBuffer.getSample(0, i);
-                float nextSample = audioBuffer.getSample(0, i+1);
+                float nextSample = audioBuffer.getSample(0, i + 1);
                 buffer.add(sample);
                 if ((sample < 0 && nextSample > 0) || (sample > 0 && nextSample < 0)) {
                     ++zeroCrossing;
                 }
                 if (zeroCrossing > 1000) {
-                    const auto ff = getFFT(buffer, buffer.size());
-                    //const auto midiNote = log(ff / 440.0) / log(2) * 12 + 69;
+                    auto ff = getFFT(buffer, buffer.size());
+                    int midiNote = log(ff / 440.0) / log(2) * 12 + 69;
+                    DBG(bits);
+                    if (prevMidiNote == -1) {
+                        auto noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
+                        midiBuffer.addEvent(noteOn);
+                        prevMidiNote = midiNote;
+                    }
+                    if(midiNote != prevMidiNote && midiNote > 0) {
+                        auto noteOff = juce::MidiMessage::noteOff(1, prevMidiNote);
+                        midiBuffer.addEvent(noteOff, bits * 24);
+                        bits = 0;
+                        auto noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
+                        prevMidiNote = midiNote;
+                        midiBuffer.addEvent(noteOn);
+                        
+                    }else{
+                      bits++; 
+                    }
                     zeroCrossing = 0;
                     buffer.clear();
-                    DBG(ff);
                 }
 
             }
-
+            midiBuffer.updateMatchedPairs();
+            juce::MidiFile midiFile;
+            midiFile.setTicksPerQuarterNote(96);
+            juce::File file = juce::File(juce::File::getSpecialLocation(juce::File::userDesktopDirectory)).getChildFile("example.midi");
+            juce::FileOutputStream stream(file);
+            midiFile.addTrack(midiBuffer);
+            midiFile.writeTo(stream);
             formatManager.clearFormats();
             buffer.clear();
 
