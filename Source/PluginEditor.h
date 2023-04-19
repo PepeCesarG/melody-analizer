@@ -29,6 +29,7 @@ private:
     // access the processor object that created it.
     MelodyanalizerAudioProcessor& audioProcessor;
     juce::TextButton loadButton{ "Load" };
+    juce::Label buttonLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MelodyanalizerAudioProcessorEditor)
 };

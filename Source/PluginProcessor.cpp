@@ -194,9 +194,7 @@ void MelodyanalizerAudioProcessor::loadFile()
             //Creamos el reader en base al archivo
             formatManager.registerBasicFormats();
             formatReader = formatManager.createReaderFor(file);
-            //El audio se ha cargado
-            isAudioLoaded = true;
-            audioName = file.getFileName();
+
             //Leemos el audio y lo metemos en un buffer
             juce::AudioBuffer<float> audioBuffer;
             audioBuffer.setSize(formatReader->numChannels, formatReader->lengthInSamples);
@@ -255,6 +253,9 @@ void MelodyanalizerAudioProcessor::loadFile()
             juce::FileOutputStream outputStream(outputFile);
             midiFile.writeTo(outputStream);
             outputStream.flush();
+            //El audio se ha cargado
+            isAudioLoaded = true;
+            audioName = file.getFileName();
             formatManager.clearFormats();
             buffer.clear();
 

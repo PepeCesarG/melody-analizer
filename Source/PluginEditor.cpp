@@ -13,6 +13,11 @@
 MelodyanalizerAudioProcessorEditor::MelodyanalizerAudioProcessorEditor (MelodyanalizerAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    addAndMakeVisible(buttonLabel);
+    buttonLabel.setText("", juce::dontSendNotification);
+    buttonLabel.attachToComponent(&loadButton, true);
+    buttonLabel.setJustificationType(juce::Justification::centred);
+
     loadButton.onClick = [&]() {
         audioProcessor.loadFile();
     };
@@ -27,7 +32,10 @@ MelodyanalizerAudioProcessorEditor::~MelodyanalizerAudioProcessorEditor()
 //==============================================================================
 void MelodyanalizerAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    if (audioProcessor.isAudioLoaded) {
+        buttonLabel.setText(audioProcessor.audioName + " loaded", juce::dontSendNotification);
+        loadButton.setButtonText("Click to load a new audio");
+    }
 }
 
 void MelodyanalizerAudioProcessorEditor::resized()
