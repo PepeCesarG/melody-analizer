@@ -204,8 +204,10 @@ void MelodyanalizerAudioProcessor::loadFile()
             juce::Array<float> buffer;
             juce::MidiMessageSequence midiBuffer;
             int zeroCrossing = 0;
-            int bits = 1;
+            int bits = 0;
             double prevMidiNote = -1;
+            auto noteOn = juce::MidiMessage::noteOn(1, 1, 1.0f);;
+            auto noteOff = juce::MidiMessage::noteOff(1, 1);
             for (int i = 0; i < formatReader->lengthInSamples - 1; ++i) {
                 float sample = audioBuffer.getSample(0, i);
                 float nextSample = audioBuffer.getSample(0, i + 1);
@@ -217,18 +219,16 @@ void MelodyanalizerAudioProcessor::loadFile()
                     auto ff = getFFT(buffer, buffer.size());
                     int midiNote = log(ff / 440.0) / log(2) * 12 + 69;
                     if (prevMidiNote == -1) {
-                        auto noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
-                        midiBuffer.addEvent(noteOn);
+                        noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
+                        midiBuffer.addEvent(noteOn, bits * 48);
                         prevMidiNote = midiNote;
                     }
                     if(midiNote != prevMidiNote && midiNote > 0) {
-                        auto noteOff = juce::MidiMessage::noteOff(1, prevMidiNote);
-                        midiBuffer.addEvent(noteOff, bits * 24);
-                        bits = 0;
-                        auto noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
+                        noteOff = juce::MidiMessage::noteOff(1, prevMidiNote);
+                        midiBuffer.addEvent(noteOff, bits * 48);
+                        noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
                         prevMidiNote = midiNote;
-                        midiBuffer.addEvent(noteOn);
-                        
+                        midiBuffer.addEvent(noteOn, bits * 48);   
                     }else{
                       bits++; 
                     }
@@ -237,8 +237,8 @@ void MelodyanalizerAudioProcessor::loadFile()
                 }
 
             }
-            auto noteOff = juce::MidiMessage::noteOff(1, prevMidiNote);
-            midiBuffer.addEvent(noteOff, bits * 48);
+            noteOff = juce::MidiMessage::noteOff(1, prevMidiNote);
+            midiBuffer.addEvent(noteOff, bits * 96);
             midiBuffer.updateMatchedPairs();
             juce::MidiFile midiFile;
             midiFile.setTicksPerQuarterNote(96);
