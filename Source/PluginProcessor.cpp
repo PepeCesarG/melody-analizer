@@ -217,7 +217,7 @@ void MelodyanalizerAudioProcessor::loadFile()
                 }
                 if (zeroCrossing > 1000) {
                     auto ff = getFFT(buffer, buffer.size());
-                    int midiNote = log(ff / 440.0) / log(2) * 12 + 69;
+                    int midiNote = std::log2(ff / 440.0) * 12 + 69;
                     if (prevMidiNote == -1) {
                         noteOn = juce::MidiMessage::noteOn(1, midiNote, 1.0f);
                         midiBuffer.addEvent(noteOn, bits * 48);
@@ -248,7 +248,9 @@ void MelodyanalizerAudioProcessor::loadFile()
             auto randomInt = juce::String(juce::Random::getSystemRandom().nextInt());
             fileName.append(randomInt, 5);
             fileName.append(".midi", 5);
-            juce::File outputFile = juce::File(juce::File::getSpecialLocation(juce::File::userDesktopDirectory)).getChildFile(fileName);
+            juce::File outputFile = juce::File(
+            juce::File::getSpecialLocation(juce::File::userDesktopDirectory))
+            .getChildFile(fileName);
             outputFile.deleteFile();
             juce::FileOutputStream outputStream(outputFile);
             midiFile.writeTo(outputStream);

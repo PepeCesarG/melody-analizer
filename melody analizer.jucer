@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="jRYoI7" name="melody analizer" projectType="audioplug" useAppConfig="0"
+<JUCERPROJECT id="jRYoI7" name="Melody Analyzer" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               defines="JUCE_MODAL_LOOPS_PERMITTED=1">
-  <MAINGROUP id="ElQXJk" name="melody analizer">
+  <MAINGROUP id="ElQXJk" name="Melody Analyzer">
     <GROUP id="{EFC63F4D-8901-58B1-ECFE-E9B403D89844}" name="Source">
       <FILE id="x6AUUf" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
